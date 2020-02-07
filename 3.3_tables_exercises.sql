@@ -10,7 +10,11 @@ DESCRIBE employees;
 
 ### 6 emp_no, gender
 
+<<<<<<< HEAD
 ### 7 first_name, last_name, gender
+=======
+### 7 first_name, lasrt_name
+>>>>>>> f5978e1bb2fdb184dec2fe202061acfc21654147
 
 ### 8 birth_date, hire_date
 
@@ -26,6 +30,7 @@ SELECT * FROM dept_manager;
 
 SHOW CREATE TABLE dept_manager;
 
+<<<<<<< HEAD
 SELECT * FROM salaries;
 
 -/* - CREATE TABLE `dept_manager` (
@@ -42,3 +47,5 @@ SELECT * FROM salaries;
 
 
 
+=======
+>>>>>>> f5978e1bb2fdb184dec2fe202061acfc21654147
