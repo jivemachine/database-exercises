@@ -26,3 +26,11 @@ ORDER BY birth_date ASC, hire_date DESC
 LIMIT 5
 OFFSET 45;
 
+# finding your OFFSET
+
+(page - 1) * limit = OFFSET
+
+
+
+
+
