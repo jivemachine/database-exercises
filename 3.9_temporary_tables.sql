@@ -99,24 +99,28 @@ SELECT * FROM payments LIMIT 50;
 # 3 Find out how the average pay in each department compares to the overall average pay. In order to make the comparison easier, you should use the Z-score for salaries. In terms of salary, what is the best department to work for? The worst?
 
 CREATE TEMPORARY TABLE employees2 AS
-SELECT emp_no, salary, dept_name, to_date
+SELECT emp_no, salary, dept_name, salaries.to_date, dept_emp.to_date
 FROM employees.dept_emp
 JOIN employees.salaries USING(emp_no)
 JOIN employees.departments USING(dept_no);
 
 CREATE TEMPORARY TABLE employees3 AS
-SELECT emp_no, salary, dept_name, to_date
+SELECT emp_no, salary, dept_name, salaries.to_date, dept_emp.to_date
 FROM employees.dept_emp
 JOIN employees.salaries USING(emp_no)
 JOIN employees.departments USING(dept_no);
 
 CREATE TEMPORARY TABLE employees4 AS
-SELECT emp_no, salary, dept_name, to_date
+SELECT emp_no, salary, dept_name, salaries.to_date, dept_emp.to_date
 FROM employees.dept_emp
 JOIN employees.salaries USING(emp_no)
 JOIN employees.departments USING(dept_no);
 
 ## AVG per department
+SELECT dept_name, AVG(salary)
+FROM employees2
+GROUP BY dept_name;
+
 SELECT dept_name, AVG(salary) 
 FROM employees2
 WHERE to_date LIKE "9999%"
@@ -126,9 +130,17 @@ GROUP BY dept_name;
 SELECT AVG(salary)
 FROM employees2;  
 
+SELECT AVG(salary)
+FROM employees2
+WHERE to_date > now();
+
 # standard deviation
 SELECT stddev(salary)
 FROM employees2;
+
+SELECT STDDEV(salary)
+FROM employees2
+WHERE to_date > NOW();
 
 ## equation
 
@@ -136,6 +148,29 @@ FROM employees2;
 SELECT dept_name, (AVG(salary) - (SELECT AVG(salary) FROM employees3))
 / (SELECT stddev(salary) FROM employees4)
 FROM employees2  
+GROUP BY dept_name;
+
+
+SELECT dept_name, (AVG(salary) - (SELECT AVG(salary) FROM employees3
+WHERE to_date > NOW()))
+/ (SELECT STDDEV(salary) FROM employees4 
+WHERE to_date > NOW())
+FROM employees2
+GROUP BY dept_name;
+
+## -0.297
+SELECT dept_name, (AVG(salary) - (SELECT AVG(salary) FROM employees3))
+/ (SELECT stddev(salary) FROM employees4)
+FROM employees2  
+GROUP BY dept_name;
+
+
+
+### -0.25
+SELECT dept_name, (AVG(salary) - (SELECT AVG(salary) FROM employees3))
+/ (SELECT stddev(salary) FROM employees4)
+FROM employees2 
+WHERE to_date > NOW() 
 GROUP BY dept_name;
 
 
@@ -165,4 +200,38 @@ SELECT dept_name,
 	GROUP BY dept_name) AS salary_z_score
 WHERE salary_z_score - (SELECT AVG(salary FROM employees2))
 AND salary_z_score / (SELECT stddev(salary) FROM employees2)
+
+
+
+##### the answer is here
+
+--create the tables
+--including to_date for dept_emp and salaries to_date
+CREATE TEMPORARY TABLE employees9 AS
+SELECT emp_no, salary, dept_name, dept_emp.to_date, salaries.to_date AS s_to_date
+FROM employees.dept_emp
+JOIN employees.salaries USING(emp_no)
+JOIN employees.departments USING(dept_no);
+
+CREATE TEMPORARY TABLE employees7 AS
+SELECT emp_no, salary, dept_name, dept_emp.to_date, salaries.to_date AS s_to_date
+FROM employees.dept_emp
+JOIN employees.salaries USING(emp_no)
+JOIN employees.departments USING(dept_no);
+
+CREATE TEMPORARY TABLE employees8 AS
+SELECT emp_no, salary, dept_name, dept_emp.to_date, salaries.to_date AS s_to_date
+FROM employees.dept_emp
+JOIN employees.salaries USING(emp_no)
+JOIN employees.departments USING(dept_no);
+
+--run the equation using all 3 tables
+SELECT dept_name, (AVG(salary) - (SELECT AVG(salary) FROM employees7 WHERE to_date > now() AND s_to_date > now()))
+/ (SELECT stddev(salary) FROM employees8 WHERE to_date > now() AND s_to_date > now())
+FROM employees9
+WHERE to_date > now()
+AND s_to_date > now()  
+GROUP BY dept_name;
+
+
 
