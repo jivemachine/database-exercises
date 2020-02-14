@@ -234,4 +234,31 @@ AND s_to_date > now()
 GROUP BY dept_name;
 
 
+## zachs solution
+# One big query
+SELECT a.dept_name, AVG(a.z_salary) AS avg_z_salary
+FROM (
+	SELECT
+        d.dept_name,
+        s.emp_no,
+        s.salary,
+        (
+            (
+                s.salary - (SELECT AVG(salary) FROM employees.salaries WHERE to_date > NOW())
+            ) / (
+                SELECT STDDEV(salary)  FROM employees.salaries WHERE to_date > NOW()
+            )
+        ) AS z_salary
+	FROM employees.salaries s
+	JOIN employees.dept_emp de ON s.emp_no = de.emp_no
+	JOIN employees.departments d ON de.dept_no = d.dept_no
+	WHERE s.to_date > NOW()
+) a
+GROUP BY a.dept_name;
+
+SELECT 1
+FROM (SELECT 1);
+
+
+
 
